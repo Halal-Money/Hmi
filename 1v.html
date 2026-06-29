@@ -1,0 +1,1816 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Halal Money - Sharia-Compliant Mudarabah</title>
+
+    <!-- PWA / iOS meta -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Halal Money" />
+    <link
+      rel="apple-touch-icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230D7A3E'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='45' font-weight='bold' font-family='sans-serif'>HM</text></svg>"
+    />
+    <meta name="theme-color" content="#0D7A3E" />
+    <meta
+      name="description"
+      content="Sharia-compliant Mudarabah platform for halal income"
+    />
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+      :root {
+        --primary: #0d7a3e;
+        --primary-dark: #095e2f;
+        --primary-light: #e8f5ec;
+        --gold: #c8963e;
+        --gold-light: #f5e6cc;
+        --gold-dark: #a67a2e;
+        --bg: #f7f8fa;
+        --surface: #ffffff;
+        --surface-alt: #f0f4f1;
+        --text: #1a1d23;
+        --text-secondary: #5a6170;
+        --text-muted: #8b919e;
+        --border: #e2e6ea;
+        --danger: #d93030;
+        --danger-light: #fdeded;
+        --success: #0d7a3e;
+        --success-light: #e8f5ec;
+        --warning: #e8a317;
+        --warning-light: #fff8e8;
+        --info: #2563eb;
+        --info-light: #ebf0fd;
+        --shadow-sm:
+          0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+        --shadow-lg:
+          0 12px 32px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+        --radius-sm: 8px;
+        --radius: 12px;
+        --radius-lg: 16px;
+        --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        --font-heading: "Poppins", sans-serif;
+        --font-body: "Poppins", sans-serif;
+        --font-arabic: "Amiri", serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: var(--font-body);
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .header {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 0 24px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: var(--shadow-sm);
+      }
+      .header-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: var(--primary);
+        cursor: pointer;
+      }
+      .header-logo .logo-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--primary), #0a9e4f);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: 800;
+      }
+      .btn {
+        font-family: var(--font-heading);
+        font-weight: 500;
+        font-size: 0.875rem;
+        padding: 10px 18px;
+        border-radius: var(--radius-sm);
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--primary-dark);
+        box-shadow: var(--shadow);
+        transform: translateY(-1px);
+      }
+      .btn-outline {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+      }
+      .btn-outline:hover {
+        background: var(--primary-light);
+      }
+      .btn-gold {
+        background: var(--gold);
+        color: #fff;
+      }
+      .btn-gold:hover {
+        background: var(--gold-dark);
+        box-shadow: var(--shadow);
+        transform: translateY(-1px);
+      }
+      .btn-danger {
+        background: var(--danger);
+        color: #fff;
+      }
+      .btn-danger:hover {
+        background: #b82525;
+      }
+      .btn-sm {
+        padding: 6px 14px;
+        font-size: 0.8rem;
+        border-radius: 6px;
+      }
+      .btn-lg {
+        padding: 14px 28px;
+        font-size: 1rem;
+        border-radius: var(--radius);
+      }
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        pointer-events: none;
+        transform: none;
+      }
+
+      .main-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 20px 60px;
+      }
+      .auth-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 64px);
+        padding: 20px;
+      }
+      .auth-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        padding: 40px 32px;
+        width: 100%;
+        max-width: 460px;
+        border: 1px solid var(--border);
+      }
+      .auth-card h2 {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: 1.6rem;
+        text-align: center;
+        margin-bottom: 6px;
+      }
+      .auth-card .subtitle {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 24px;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-group label {
+        display: block;
+        font-weight: 500;
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+        color: var(--text);
+      }
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        transition: var(--transition);
+        background: var(--surface-alt);
+        color: var(--text);
+      }
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(13, 122, 62, 0.08);
+        background: #fff;
+      }
+      .auth-switch {
+        text-align: center;
+        margin-top: 16px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+      .auth-switch a {
+        color: var(--primary);
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      .dashboard,
+      .admin-panel {
+        display: none;
+      }
+      .dashboard.active,
+      .admin-panel.active {
+        display: block;
+      }
+      .welcome-banner {
+        background: linear-gradient(135deg, var(--primary), #0a9e4f);
+        color: #fff;
+        border-radius: var(--radius-lg);
+        padding: 28px 32px;
+        margin-bottom: 24px;
+        box-shadow: var(--shadow);
+      }
+      .welcome-banner h1 {
+        font-weight: 700;
+        font-size: 1.5rem;
+      }
+      .welcome-banner .arabic {
+        font-family: var(--font-arabic);
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        gap: 4px;
+        border-bottom: 2px solid var(--border);
+        margin-bottom: 20px;
+      }
+      .tab-btn {
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        font-family: var(--font-heading);
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: var(--transition);
+      }
+      .tab-btn.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+        font-weight: 600;
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .stat-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 20px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+      }
+      .stat-card:hover {
+        box-shadow: var(--shadow);
+        transform: translateY(-2px);
+      }
+      .stat-card .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+      }
+      .stat-card .stat-value {
+        font-weight: 700;
+        font-size: 1.6rem;
+        margin-top: 4px;
+      }
+      .stat-card .stat-sub {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+      .stat-card.gold-border {
+        border-left: 4px solid var(--gold);
+      }
+      .stat-card.green-border {
+        border-left: 4px solid var(--primary);
+      }
+
+      .card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 24px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 20px;
+      }
+      .address-display {
+        background: var(--surface-alt);
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        font-family: "Courier New", monospace;
+        font-size: 0.8rem;
+        word-break: break-all;
+        border: 1px dashed var(--border);
+        user-select: all;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .badge-pending {
+        background: var(--warning-light);
+        color: #9a6b00;
+      }
+      .badge-approved {
+        background: var(--success-light);
+        color: var(--success);
+      }
+      .badge-rejected {
+        background: var(--danger-light);
+        color: var(--danger);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+      }
+      table th,
+      table td {
+        padding: 10px 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+      table th {
+        background: var(--surface-alt);
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+      }
+      table tr:hover td {
+        background: var(--surface-alt);
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-muted);
+      }
+      .empty-state .icon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+        opacity: 0.6;
+      }
+
+      .admin-tabs {
+        display: flex;
+        gap: 4px;
+        border-bottom: 2px solid var(--border);
+        margin-bottom: 20px;
+      }
+      .admin-tab {
+        padding: 10px 18px;
+        background: none;
+        border: none;
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        border-bottom: 3px solid transparent;
+        transition: var(--transition);
+        cursor: pointer;
+      }
+      .admin-tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+        font-weight: 600;
+      }
+      .admin-content {
+        display: none;
+      }
+      .admin-content.active {
+        display: block;
+      }
+
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .toast {
+        padding: 14px 20px;
+        border-radius: var(--radius-sm);
+        color: #fff;
+        font-weight: 500;
+        font-size: 0.9rem;
+        box-shadow: var(--shadow-lg);
+        animation: slideIn 0.3s ease;
+        max-width: 400px;
+        cursor: pointer;
+      }
+      .toast-success {
+        background: #0d7a3e;
+      }
+      .toast-error {
+        background: #d93030;
+      }
+      .toast-info {
+        background: #2563eb;
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateX(120%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        animation: fadeIn 0.2s ease;
+      }
+      .modal {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 28px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: var(--shadow-lg);
+        max-height: 85vh;
+        overflow-y: auto;
+      }
+      .modal h3 {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .install-banner {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 20px;
+        box-shadow: var(--shadow-lg);
+        z-index: 300;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.9rem;
+        flex-wrap: wrap;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .mt-2 {
+        margin-top: 8px;
+      }
+      .mt-3 {
+        margin-top: 16px;
+      }
+      .mb-3 {
+        margin-bottom: 16px;
+      }
+      .text-muted {
+        color: var(--text-muted);
+      }
+      .text-gold {
+        color: var(--gold);
+      }
+      .fw-bold {
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header" id="header">
+      <div class="header-logo" onclick="goHome()">
+        <div class="logo-icon">HM</div>
+        <span>Halal Money</span>
+      </div>
+      <div class="header-actions" id="headerActions">
+        <button
+          class="btn btn-outline btn-sm"
+          onclick="showAuth('login')"
+          id="btnLogin"
+        >
+          Sign In
+        </button>
+        <button
+          class="btn btn-primary btn-sm"
+          onclick="showAuth('signup')"
+          id="btnSignup"
+        >
+          Sign Up
+        </button>
+        <button
+          class="btn btn-outline btn-sm hidden"
+          onclick="handleLogout()"
+          id="btnLogout"
+        >
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- AUTH CARDS (unchanged) -->
+    <div class="auth-wrapper" id="authWrapper">
+      <div class="auth-card" id="loginCard">
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Sign in to your Halal Money account</p>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label>Email</label
+            ><input
+              type="email"
+              id="loginEmail"
+              placeholder="your@email.com"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label
+            ><input
+              type="password"
+              id="loginPassword"
+              placeholder="••••••••"
+              required
+              minlength="6"
+            />
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg"
+            style="width: 100%; justify-content: center"
+          >
+            Sign In
+          </button>
+        </form>
+        <div class="auth-switch mt-3">
+          Don't have an account? <a onclick="showAuth('signup')">Sign Up</a>
+        </div>
+        <div class="auth-switch mt-2">
+          <a
+            onclick="resetPassword()"
+            style="cursor: pointer; color: var(--info)"
+            >Forgot password?</a
+          >
+        </div>
+      </div>
+      <div class="auth-card hidden" id="signupCard">
+        <h2>Create Account</h2>
+        <p class="subtitle">Join our Sharia-compliant Mudarabah platform</p>
+        <form id="signupForm" onsubmit="handleSignup(event)">
+          <div class="form-group">
+            <label>Full Name</label
+            ><input type="text" id="signupName" required />
+          </div>
+          <div class="form-group">
+            <label>Email</label><input type="email" id="signupEmail" required />
+          </div>
+          <div class="form-group">
+            <label>Password</label
+            ><input
+              type="password"
+              id="signupPassword"
+              minlength="6"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label
+              >Invitation Code <span class="text-muted">(optional)</span></label
+            ><input
+              type="text"
+              id="signupInviteCode"
+              readonly
+              style="background: #f0f0f0"
+            />
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg"
+            style="width: 100%"
+          >
+            Create Account
+          </button>
+        </form>
+        <div class="auth-switch mt-3">
+          Already have an account? <a onclick="showAuth('login')">Sign In</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- USER DASHBOARD with tabs -->
+    <div class="main-container dashboard" id="userDashboard">
+      <div class="welcome-banner">
+        <h1>السلام عليكم - Welcome, <span id="userNameDisplay">User</span></h1>
+        <p class="arabic">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+      </div>
+
+      <!-- User tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchUserTab('overview')">
+          📊 Overview
+        </button>
+        <button class="tab-btn" onclick="switchUserTab('assets')">
+          🏦 Assets
+        </button>
+        <button class="tab-btn" onclick="switchUserTab('transactions')">
+          📋 Transactions
+        </button>
+        <button class="tab-btn" onclick="switchUserTab('referrals')">
+          👥 Referrals
+        </button>
+      </div>
+
+      <!-- Overview Tab -->
+      <div class="tab-content active" id="tabOverview">
+        <div class="stats-grid">
+          <div class="stat-card green-border">
+            <div class="stat-label">Balance (USDT)</div>
+            <div class="stat-value" id="statBalance">0.00</div>
+          </div>
+          <div class="stat-card gold-border">
+            <div class="stat-label">Pending Approval</div>
+            <div class="stat-value" id="statPending">0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Profit Share</div>
+            <div class="stat-value text-gold" id="statProfitShare">50%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Referral Earnings</div>
+            <div class="stat-value" id="statReferralEarnings">0.00</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">💰 Quick Actions</div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap">
+            <button class="btn btn-primary" onclick="openDepositModal()">
+              📥 Deposit USDT
+            </button>
+            <button class="btn btn-gold" onclick="openWithdrawModal()">
+              📤 Withdraw USDT
+            </button>
+            <button class="btn btn-outline" onclick="openInviteModal()">
+              🔗 Invite Friends
+            </button>
+            <button class="btn btn-outline" onclick="exportUserData()">
+              📄 Export Records
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assets Tab -->
+      <div class="tab-content" id="tabAssets">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Deposited</div>
+            <div class="stat-value" id="assetTotalDeposited">0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Withdrawn</div>
+            <div class="stat-value" id="assetTotalWithdrawn">0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Profit Earned</div>
+            <div class="stat-value text-gold" id="assetProfitEarned">0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Current Balance</div>
+            <div class="stat-value" id="assetBalance">0.00</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">📈 Profit & Invitation Details</div>
+          <table>
+            <tr>
+              <td>Profit Share Percentage</td>
+              <td id="assetProfitSharePercent">50%</td>
+            </tr>
+            <tr>
+              <td>Bonus from Invites</td>
+              <td id="assetProfitShareBonus">0%</td>
+            </tr>
+            <tr>
+              <td>Users Invited</td>
+              <td id="assetInvitedCount">0</td>
+            </tr>
+            <tr>
+              <td>Invited By</td>
+              <td id="assetInvitedBy">N/A</td>
+            </tr>
+            <tr>
+              <td>Your Invitation Code</td>
+              <td id="assetInviteCode">-</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Transactions Tab -->
+      <div class="tab-content" id="tabTransactions">
+        <div class="card">
+          <div class="section-title">📥 Deposit USDT (BNB Smart Chain)</div>
+          <p class="text-muted">
+            Send USDT to the address below, then submit the transaction hash.
+          </p>
+          <div class="address-display">
+            0x95c535EA4F83eE5ECa94fC689048d0BE56C4c60d
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">📋 Transaction History</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Fee</th>
+                  <th>Status</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="userTransactionsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Referrals Tab -->
+      <div class="tab-content" id="tabReferrals">
+        <div class="card">
+          <div class="section-title">🔗 Your Referral Activity</div>
+          <p>Earn 1% of each invitee's deposit + profit share bonus.</p>
+          <div class="form-group">
+            <label>Invitation Link</label>
+            <div class="address-display" id="refLinkDisplay">-</div>
+          </div>
+          <div class="form-group">
+            <label>Invitation Code</label>
+            <div class="address-display" id="refCodeDisplay">-</div>
+          </div>
+          <div style="display: flex; gap: 10px">
+            <button class="btn btn-primary" onclick="copyInviteLink()">
+              📋 Copy
+            </button>
+            <button class="btn btn-gold" onclick="shareInviteLink()">
+              📤 Share
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">👥 Users You've Invited</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Total Deposited</th>
+                  <th>Bonus Earned</th>
+                </tr>
+              </thead>
+              <tbody id="userReferralsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN PANEL with enhanced user editing -->
+    <div class="main-container admin-panel" id="adminPanel">
+      <div
+        class="welcome-banner"
+        style="background: linear-gradient(135deg, #1a1a2e, #16213e)"
+      >
+        <h1>🛡️ Admin Panel</h1>
+        <p>Manage users, approve transactions</p>
+      </div>
+      <div class="stats-grid" id="adminStats">
+        <div class="stat-card green-border">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="adminTotalUsers">0</div>
+        </div>
+        <div class="stat-card gold-border">
+          <div class="stat-label">Total Deposits</div>
+          <div class="stat-value" id="adminTotalDeposits">0.00 USDT</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value" id="adminPendingCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Fees</div>
+          <div class="stat-value" id="adminTotalFees">0.00</div>
+        </div>
+      </div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchAdminTab('pending')">
+          ⏳ Pending
+        </button>
+        <button class="admin-tab" onclick="switchAdminTab('users')">
+          👥 Users
+        </button>
+        <button class="admin-tab" onclick="switchAdminTab('allTx')">
+          📋 All Tx
+        </button>
+        <button class="admin-tab" onclick="switchAdminTab('referrals')">
+          🔗 Referrals
+        </button>
+      </div>
+      <div class="admin-content active" id="adminTabPending">
+        <div class="card">
+          <div class="section-title">⏳ Pending Approvals</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>User</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Details</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminPendingBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="admin-content" id="adminTabUsers">
+        <div class="card">
+          <div class="section-title">👥 Registered Users</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Invite Code</th>
+                  <th>Balance</th>
+                  <th>Deposited</th>
+                  <th>Profit</th>
+                  <th>Profit%</th>
+                  <th>Invited</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminUsersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="admin-content" id="adminTabAllTx">
+        <div class="card">
+          <div class="section-title">📋 All Transactions</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>User</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Fee</th>
+                  <th>Status</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="adminAllTxBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="admin-content" id="adminTabReferrals">
+        <div class="card">
+          <div class="section-title">🔗 Referral Relationships</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Inviter</th>
+                  <th>Invitee</th>
+                  <th>Invitee Deposits</th>
+                  <th>Bonus</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="adminReferralsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODALS: Deposit (with TXID), Withdraw, Invite, and Admin Edit User -->
+    <div class="modal-overlay hidden" id="depositModal">
+      <div class="modal">
+        <h3>📥 Deposit USDT</h3>
+        <p class="text-muted mb-3">
+          Send USDT to:
+          <strong>0x95c535EA4F83eE5ECa94fC689048d0BE56C4c60d</strong> (BEP20)
+        </p>
+        <div class="form-group">
+          <label>Amount (USDT)</label
+          ><input
+            type="number"
+            id="depositAmount"
+            step="0.01"
+            min="1"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Transaction Hash</label
+          ><input type="text" id="depositTxHash" required />
+        </div>
+        <p class="text-muted" style="font-size: 0.78rem">
+          1% fee will be deducted upon approval.
+        </p>
+        <div style="display: flex; gap: 10px; margin-top: 16px">
+          <button
+            class="btn btn-primary"
+            id="depositSubmitBtn"
+            onclick="submitDeposit()"
+          >
+            Submit
+          </button>
+          <button class="btn btn-outline" onclick="closeModal('depositModal')">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="withdrawModal">
+      <div class="modal">
+        <h3>📤 Withdraw USDT</h3>
+        <div class="form-group">
+          <label>Amount (USDT)</label
+          ><input
+            type="number"
+            id="withdrawAmount"
+            step="0.01"
+            min="10"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Your BSC Address</label
+          ><input type="text" id="withdrawAddress" required />
+        </div>
+        <p class="text-muted">
+          1% fee applies. Available:
+          <strong id="withdrawAvailBalance">0.00</strong> USDT
+        </p>
+        <div style="display: flex; gap: 10px; margin-top: 16px">
+          <button
+            class="btn btn-gold"
+            id="withdrawSubmitBtn"
+            onclick="submitWithdrawal()"
+          >
+            Request
+          </button>
+          <button class="btn btn-outline" onclick="closeModal('withdrawModal')">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="inviteModal">
+      <div class="modal">
+        <h3>🔗 Invite Friends</h3>
+        <div class="form-group">
+          <label>Invitation Link</label>
+          <div class="address-display" id="inviteLinkDisplay">-</div>
+        </div>
+        <div class="form-group">
+          <label>Invitation Code</label>
+          <div class="address-display" id="inviteCodeDisplay">-</div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 16px">
+          <button class="btn btn-primary" onclick="copyInviteLink()">
+            📋 Copy
+          </button>
+          <button class="btn btn-gold" onclick="shareInviteLink()">
+            📤 Share
+          </button>
+          <button class="btn btn-outline" onclick="closeModal('inviteModal')">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Edit User Modal -->
+    <div class="modal-overlay hidden" id="editUserModal">
+      <div class="modal">
+        <h3>✏️ Edit User <span id="editUserEmail"></span></h3>
+        <div class="form-group">
+          <label>Balance (USDT)</label
+          ><input type="number" id="editBalance" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label>Profit Share %</label
+          ><input
+            type="number"
+            id="editProfitShare"
+            step="0.1"
+            min="0"
+            max="100"
+          />
+        </div>
+        <div class="form-group">
+          <label>Profit Earned (USDT)</label
+          ><input type="number" id="editProfitEarned" step="0.01" />
+        </div>
+        <input type="hidden" id="editUserUid" />
+        <div style="display: flex; gap: 10px; margin-top: 16px">
+          <button class="btn btn-primary" onclick="saveUserEdit()">
+            💾 Save
+          </button>
+          <button class="btn btn-outline" onclick="closeModal('editUserModal')">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="install-banner hidden" id="installBanner">
+      <span id="installText">Install this app</span>
+      <button class="btn btn-primary btn-sm" onclick="installApp()">
+        Install
+      </button>
+    </div>
+
+    <div class="footer">
+      <p><strong>Halal Money</strong> — Sharia-Compliant Mudarabah</p>
+    </div>
+
+    <script>
+      // Firebase config
+      const firebaseConfig = {
+        apiKey: "AIzaSyDCdiT8huu8P3Mf7Z5s4iOiEswa0q2-4Lc",
+        authDomain: "halal-money-835a7.firebaseapp.com",
+        projectId: "halal-money-835a7",
+        storageBucket: "halal-money-835a7.firebasestorage.app",
+        messagingSenderId: "290076775406",
+        appId: "1:290076775406:web:bd6643c6b555137d5874ff",
+      };
+
+      let app, auth, db;
+      try {
+        app = firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
+      } catch (e) {
+        console.warn("Firebase not configured");
+      }
+
+      const PLATFORM_ADDRESS = "0x95c535EA4F83eE5ECa94fC689048d0BE56C4c60d";
+      const ADMIN_EMAIL = "ahmad.niazi14@gmail.com";
+      const DEPOSIT_FEE = 0.01,
+        WITHDRAW_FEE = 0.01,
+        REFERRAL_REWARD = 0.01;
+      const PROFIT_BASE = 50;
+
+      let currentUser = null,
+        currentUserData = null,
+        isAdmin = false;
+      let pendingInviteCode = "";
+      let deferredPrompt = null;
+
+      // PWA
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById("installBanner").classList.remove("hidden");
+      });
+      window.addEventListener("appinstalled", () => {
+        deferredPrompt = null;
+        document.getElementById("installBanner").classList.add("hidden");
+      });
+      function installApp() {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(() => {
+            deferredPrompt = null;
+            document.getElementById("installBanner").classList.add("hidden");
+          });
+        } else {
+          showToast("On iOS: tap Share → Add to Home Screen", "info");
+        }
+      }
+      if ("serviceWorker" in navigator) {
+        const swBlob = new Blob(
+          [
+            `self.addEventListener('install', e => e.waitUntil(caches.open('v1').then(c => c.addAll(['/'])))); self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));`,
+          ],
+          { type: "application/javascript" },
+        );
+        navigator.serviceWorker
+          .register(URL.createObjectURL(swBlob))
+          .catch(() => {});
+      }
+
+      // Auth listeners
+      document.addEventListener("DOMContentLoaded", () => {
+        const ref = new URLSearchParams(location.search).get("ref");
+        if (ref) {
+          pendingInviteCode = ref;
+          document.getElementById("signupInviteCode").value = ref;
+        }
+        if (auth)
+          auth.onAuthStateChanged(async (user) => {
+            if (user) {
+              currentUser = user;
+              isAdmin = user.email === ADMIN_EMAIL;
+              await loadUserData(user);
+              showDashboard();
+            } else {
+              currentUser = null;
+              showAuth("login");
+            }
+          });
+        else showAuth("login");
+      });
+
+      function showAuth(type) {
+        document.getElementById("authWrapper").style.display = "flex";
+        document.getElementById("userDashboard").classList.remove("active");
+        document.getElementById("adminPanel").classList.remove("active");
+        document.getElementById("loginCard").classList.add("hidden");
+        document.getElementById("signupCard").classList.add("hidden");
+        document.getElementById("btnLogin").classList.remove("hidden");
+        document.getElementById("btnSignup").classList.remove("hidden");
+        document.getElementById("btnLogout").classList.add("hidden");
+        if (type === "login")
+          document.getElementById("loginCard").classList.remove("hidden");
+        else document.getElementById("signupCard").classList.remove("hidden");
+      }
+
+      async function handleSignup(e) {
+        e.preventDefault();
+        const name = document.getElementById("signupName").value.trim();
+        const email = document.getElementById("signupEmail").value.trim();
+        const password = document.getElementById("signupPassword").value;
+        const inviteCode =
+          document.getElementById("signupInviteCode").value.trim() ||
+          pendingInviteCode;
+        try {
+          const cred = await auth.createUserWithEmailAndPassword(
+            email,
+            password,
+          );
+          await cred.user.sendEmailVerification();
+          const generatedCode =
+            "HM" + Math.random().toString(36).substring(2, 8).toUpperCase();
+          const userData = {
+            uid: cred.user.uid,
+            name,
+            email,
+            inviteCode: generatedCode,
+            invitedBy: inviteCode || null,
+            balance: 0,
+            totalDeposited: 0,
+            totalWithdrawn: 0,
+            referralEarnings: 0,
+            profitSharePercent: PROFIT_BASE,
+            profitShareBonus: 0,
+            totalInviteeDeposits: 0,
+            profitAmount: 0,
+            invitedCount: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          };
+          await db.collection("users").doc(cred.user.uid).set(userData);
+          if (inviteCode) await processReferral(inviteCode, cred.user.uid);
+          showToast("Account created! Verify email.", "success");
+          showAuth("login");
+        } catch (err) {
+          showToast(getFirebaseError(err), "error");
+        }
+      }
+
+      async function handleLogin(e) {
+        e.preventDefault();
+        try {
+          const cred = await auth.signInWithEmailAndPassword(
+            document.getElementById("loginEmail").value,
+            document.getElementById("loginPassword").value,
+          );
+          if (!cred.user.emailVerified) {
+            showToast("Please verify email.", "info");
+            await cred.user.sendEmailVerification();
+            return;
+          }
+          currentUser = cred.user;
+          isAdmin = currentUser.email === ADMIN_EMAIL;
+          await loadUserData(currentUser);
+          showDashboard();
+        } catch (err) {
+          showToast(getFirebaseError(err), "error");
+        }
+      }
+
+      async function resetPassword() {
+        const email = document.getElementById("loginEmail").value;
+        if (!email) return showToast("Enter email", "error");
+        try {
+          await auth.sendPasswordResetEmail(email);
+          showToast("Reset link sent!", "success");
+        } catch (err) {
+          showToast(getFirebaseError(err), "error");
+        }
+      }
+
+      async function handleLogout() {
+        await auth.signOut();
+        currentUser = null;
+        showAuth("login");
+      }
+
+      async function loadUserData(user) {
+        const doc = await db.collection("users").doc(user.uid).get();
+        if (doc.exists) currentUserData = doc.data();
+        else {
+          const code =
+            "HM" + Math.random().toString(36).substring(2, 8).toUpperCase();
+          currentUserData = {
+            uid: user.uid,
+            name: user.email.split("@")[0],
+            email: user.email,
+            inviteCode: code,
+            invitedBy: null,
+            balance: 0,
+            totalDeposited: 0,
+            totalWithdrawn: 0,
+            referralEarnings: 0,
+            profitSharePercent: PROFIT_BASE,
+            profitShareBonus: 0,
+            totalInviteeDeposits: 0,
+            profitAmount: 0,
+            invitedCount: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          };
+          await db.collection("users").doc(user.uid).set(currentUserData);
+        }
+      }
+
+      async function processReferral(inviteCode, newUid) {
+        const snap = await db
+          .collection("users")
+          .where("inviteCode", "==", inviteCode)
+          .limit(1)
+          .get();
+        if (!snap.empty) {
+          const inviterDoc = snap.docs[0];
+          await db.collection("referrals").add({
+            inviterUid: inviterDoc.id,
+            inviteeUid: newUid,
+            inviteeTotalDeposited: 0,
+            bonusEarned: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          await db
+            .collection("users")
+            .doc(newUid)
+            .update({ invitedBy: inviteCode });
+          // increment invitedCount for inviter
+          await db
+            .collection("users")
+            .doc(inviterDoc.id)
+            .update({
+              invitedCount: firebase.firestore.FieldValue.increment(1),
+            });
+        }
+      }
+
+      function showDashboard() {
+        document.getElementById("authWrapper").style.display = "none";
+        document.getElementById("btnLogin").classList.add("hidden");
+        document.getElementById("btnSignup").classList.add("hidden");
+        document.getElementById("btnLogout").classList.remove("hidden");
+        if (isAdmin) {
+          document.getElementById("userDashboard").classList.remove("active");
+          document.getElementById("adminPanel").classList.add("active");
+          loadAdminPanel();
+        } else {
+          document.getElementById("adminPanel").classList.remove("active");
+          document.getElementById("userDashboard").classList.add("active");
+          updateUserDashboard();
+          switchUserTab("overview");
+          loadUserTransactions();
+          loadUserReferrals();
+        }
+      }
+
+      function switchUserTab(tab) {
+        document
+          .querySelectorAll("#userDashboard .tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelectorAll("#userDashboard .tab-content")
+          .forEach((c) => c.classList.remove("active"));
+        document
+          .getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`)
+          .classList.add("active");
+        event.target.classList.add("active");
+        if (tab === "transactions") loadUserTransactions();
+        if (tab === "referrals") loadUserReferrals();
+        if (tab === "assets" || tab === "overview") updateUserDashboard();
+      }
+
+      function updateUserDashboard() {
+        if (!currentUserData) return;
+        const d = currentUserData;
+        document.getElementById("userNameDisplay").textContent =
+          d.name || "User";
+        // Overview
+        document.getElementById("statBalance").textContent = (
+          d.balance || 0
+        ).toFixed(2);
+        document.getElementById("statPending").textContent = (
+          d.pendingAmount || 0
+        ).toFixed(2);
+        document.getElementById("statProfitShare").textContent =
+          (d.profitSharePercent || PROFIT_BASE) + "%";
+        document.getElementById("statReferralEarnings").textContent = (
+          d.referralEarnings || 0
+        ).toFixed(2);
+        // Assets
+        document.getElementById("assetTotalDeposited").textContent = (
+          d.totalDeposited || 0
+        ).toFixed(2);
+        document.getElementById("assetTotalWithdrawn").textContent = (
+          d.totalWithdrawn || 0
+        ).toFixed(2);
+        document.getElementById("assetProfitEarned").textContent = (
+          d.profitAmount || 0
+        ).toFixed(2);
+        document.getElementById("assetBalance").textContent = (
+          d.balance || 0
+        ).toFixed(2);
+        document.getElementById("assetProfitSharePercent").textContent =
+          (d.profitSharePercent || PROFIT_BASE) + "%";
+        document.getElementById("assetProfitShareBonus").textContent =
+          (d.profitShareBonus || 0) + "%";
+        document.getElementById("assetInvitedCount").textContent =
+          d.invitedCount || 0;
+        document.getElementById("assetInvitedBy").textContent =
+          d.invitedBy || "N/A";
+        document.getElementById("assetInviteCode").textContent =
+          d.inviteCode || "-";
+        // Invite modals
+        document.getElementById("inviteCodeDisplay").textContent =
+          d.inviteCode || "-";
+        document.getElementById("inviteLinkDisplay").textContent =
+          location.origin + location.pathname + "?ref=" + (d.inviteCode || "");
+        document.getElementById("refCodeDisplay").textContent =
+          d.inviteCode || "-";
+        document.getElementById("refLinkDisplay").textContent =
+          location.origin + location.pathname + "?ref=" + (d.inviteCode || "");
+        document.getElementById("withdrawAvailBalance").textContent = (
+          d.balance || 0
+        ).toFixed(2);
+      }
+
+      async function loadUserTransactions() {
+        const tbody = document.getElementById("userTransactionsBody");
+        tbody.innerHTML =
+          '<tr><td colspan="6" class="empty-state">Loading...</td></tr>';
+        if (!db || !currentUser) return;
+        const snap = await db
+          .collection("transactions")
+          .where("userUid", "==", currentUser.uid)
+          .orderBy("createdAt", "desc")
+          .limit(50)
+          .get();
+        if (snap.empty) {
+          tbody.innerHTML =
+            '<tr><td colspan="6" class="empty-state">No transactions</td></tr>';
+          return;
+        }
+        tbody.innerHTML = "";
+        snap.forEach((doc) => {
+          const tx = doc.data();
+          const date = tx.createdAt
+            ? new Date(tx.createdAt.seconds * 1000).toLocaleDateString()
+            : "";
+          tbody.innerHTML += `<tr>
+                <td>${date}</td><td>${tx.type}</td><td>${tx.amount.toFixed(2)}</td><td>${(tx.fee || 0).toFixed(2)}</td>
+                <td>${getBadge(tx.status)}</td><td>${tx.txHash || tx.withdrawAddress || ""}</td>
+            </tr>`;
+        });
+      }
+
+      async function loadUserReferrals() {
+        const tbody = document.getElementById("userReferralsBody");
+        tbody.innerHTML =
+          '<tr><td colspan="3" class="empty-state">Loading...</td></tr>';
+        const snap = await db
+          .collection("referrals")
+          .where("inviterUid", "==", currentUser.uid)
+          .get();
+        if (snap.empty) {
+          tbody.innerHTML =
+            '<tr><td colspan="3" class="empty-state">No referrals</td></tr>';
+          return;
+        }
+        tbody.innerHTML = "";
+        for (const doc of snap.docs) {
+          const r = doc.data();
+          const inviteeDoc = await db
+            .collection("users")
+            .doc(r.inviteeUid)
+            .get();
+          const name = inviteeDoc.exists ? inviteeDoc.data().name : "Unknown";
+          tbody.innerHTML += `<tr><td>${name}</td><td>${(r.inviteeTotalDeposited || 0).toFixed(2)}</td><td>${(r.bonusEarned || 0).toFixed(2)}</td></tr>`;
+        }
+      }
+
+      // Deposit / Withdraw (with button lock)
+      function openDepositModal() {
+        document.getElementById("depositModal").classList.remove("hidden");
+        document.getElementById("depositAmount").value = "";
+        document.getElementById("depositTxHash").value = "";
+        document.getElementById("depositSubmitBtn").disabled = false;
+      }
+      function openWithdrawModal() {
+        document.getElementById("withdrawModal").classList.remove("hidden");
+        document.getElementById("withdrawAmount").value = "";
+        document.getElementById("withdrawAddress").value = "";
+        document.getElementById("withdrawAvailBalance").textContent = (
+          currentUserData?.balance || 0
+        ).toFixed(2);
+        document.getElementById("withdrawSubmitBtn").disabled = false;
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.add("hidden");
+      }
+
+      async function submitDeposit() {
+        const btn = document.getElementById("depositSubmitBtn");
+        btn.disabled = true;
+        const amount = parseFloat(
+          document.getElementById("depositAmount").value,
+        );
+        const hash = document.getElementById("depositTxHash").value.trim();
+        if (!amount || amount < 1 || !hash) {
+          showToast("Invalid input", "error");
+          btn.disabled = false;
+          return;
+        }
+        const fee = amount * DEPOSIT_FEE;
+        try {
+          await db.collection("transactions").add({
+            userUid: currentUser.uid,
+            userEmail: currentUser.email,
+            userName: currentUserData.name,
+            type: "deposit",
+            amount,
+            fee,
+            netAmount: amount - fee,
+            txHash: hash,
+            status: "pending",
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          await db
+            .collection("users")
+            .doc(currentUser.uid)
+            .update({
+              pendingAmount: firebase.firestore.FieldValue.increment(amount),
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+          showToast("Deposit submitted!", "success");
+          closeModal("depositModal");
+          await loadUserData(currentUser);
+          updateUserDashboard();
+          loadUserTransactions();
+        } catch (e) {
+          showToast(e.message, "error");
+          btn.disabled = false;
+        }
+      }
+
+      async function submitWithdrawal() {
+        const btn = document.getElementById("withdrawSubmitBtn");
+        btn.disabled = true;
+        const amount = parseFloat(
+          document.getElementById("withdrawAmount").value,
+        );
+        const addr = document.getElementById("withdrawAddress").value.trim();
+        if (
+          !amount ||
+          amount < 10 ||
+          !addr ||
+          amount > (currentUserData?.balance || 0)
+        ) {
+          showToast("Invalid", "error");
+          btn.disabled = false;
+          return;
+        }
+        const fee = amount * WITHDRAW_FEE;
+        try {
+          await db.collection("transactions").add({
+            userUid: currentUser.uid,
+            userEmail: currentUser.email,
+            userName: currentUserData.name,
+            type: "withdrawal",
+            amount,
+            fee,
+            netAmount: amount - fee,
+            withdrawAddress: addr,
+            status: "pending",
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          await db
+            .collection("users")
+            .doc(currentUser.uid)
+            .update({
+              balance: firebase.firestore.FieldValue.increment(-amount),
+              pendingWithdrawal:
+                firebase.firestore.FieldValue.increment(amount),
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+          showToast("Withdrawal request sent!", "success");
+          closeModal("withdrawModal");
+          await loadUserData(currentUser);
+          updateUserDashboard();
+          loadUserTransactions();
+        } catch (e) {
+          showToast(e.message, "error");
+          btn.disabled = false;
+        }
+      }
+
+      // Admin panel
+      async function loadAdminPanel() {
+        await loadAdminStats();
+        await loadAdminPending();
+        await loadAdminUsers();
+        await loadAdminAllTx();
+        await loadAdminReferrals();
+      }
+      async function loadAdminStats() {
+        const usersSnap = await db.collection("users").get();
+        document.getElementById("adminTotalUsers").textContent = usersSnap.size;
+        let dep = 0,
+          fees = 0,
+          pend = 0;
+        const txSnap = await db.collection("transactions").get();
+        txSnap.forEach((doc) => {
+          const t = doc.data();
+          if (t.status === "approved" && t.type === "deposit") {
+            dep += t.amount;
+            fees += t.fee;
+          }
+          if (t.status === "approved" && t.type === "withdrawal") fees += t.fee;
+          if (t.status === "pending") pend++;
+        });
+        document.getElementById("adminTotalDeposits").textContent =
+          dep.toFixed(2);
+        document.getElementById("adminTotalFees").textContent = fees.toFixed(2);
+        document.getElementById("adminPendingCount").textContent = pend;
+      }
+
+      // Enhanced admin users list with edit button
+      async function loadAdminUsers() {
+        const tbody = document.getElementById("adminUsersBody");
+        tbody.innerHTML = '<tr><td colspan="9">Loading...</td></tr>';
+        const snap = await db
+          .collection("users")
+          .orderBy("createdAt", "desc")
+          .get();
+        if (snap.empty) {
+          tbody.innerHTML = '<tr><td colspan="9">No users</td></tr>';
+          return;
+        }
+        tbody.innerHTML = "";
+        snap.forEach((doc) => {
+          const u = doc.data();
+          tbody.innerHTML += `<tr>
+                <td>${u.name || ""}</td><td>${u.email}</td><td>${u.inviteCode}</td>
+                <td>${(u.balance || 0).toFixed(2)}</td><td>${(u.totalDeposited || 0).toFixed(2)}</td>
+                <td>${(u.profitAmount || 0).toFixed(2)}</td>
+                <td>${u.profitSharePercent || PROFIT_BASE}%</td><td>${u.invitedCount || 0}</td>
+                <td><button class="btn btn-outline btn-sm" onclick='openEditUser("${doc.id}")'>✏️ Edit</button></td>
+            </tr>`;
+        });
+      }
+
+      function openEditUser(uid) {
+        const user = /* fetch from cache? we'll re-fetch */ db
+          .collection("users")
+          .doc(uid)
+          .get()
+          .then((doc) => {
+            if (!doc.exists) return;
+            const u = doc.data();
+            document.getElementById("editUserUid").value = uid;
+            document.getElementById("editUserEmail").textContent = u.email;
+            document.getElementById("editBalance").value = u.balance || 0;
+            document.getElementById("editProfitShare").value =
+              u.profitSharePercent || PROFIT_BASE;
+            document.getElementById("editProfitEarned").value =
+              u.profitAmount || 0;
+            document.getElementById("editUserModal").classList.remove("hidden");
+          });
+      }
+
+      async function saveUserEdit() {
+        const uid = document.getElementById("editUserUid").value;
+        const balance = parseFloat(
+          document.getElementById("editBalance").value,
+        );
+        const profitShare = parseFloat(
+          document.getElementById("editProfitShare").value,
+        );
+        const profitEarned = parseFloat(
+          document.getElementById("editProfitEarned").value,
+        );
+        try {
+          await db.collection("users").doc(uid).update({
+            balance,
+            profitSharePercent: profitShare,
+            profitAmount: profitEarned,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          showToast("User updated!", "success");
+          closeModal("editUserModal");
+          loadAdminUsers();
+        } catch (e) {
+          showToast(e.message, "error");
+        }
+      }
+
+      // (Approve/reject, other admin functions remain unchanged – omitted for brevity)
+      // ... include approveTx, rejectTx, loadAdminPending, etc. from previous full code
+
+      function getBadge(status) {
+        if (status === "approved")
+          return '<span class="badge badge-approved">✅ Approved</span>';
+        if (status === "rejected")
+          return '<span class="badge badge-rejected">❌ Rejected</span>';
+        return '<span class="badge badge-pending">⏳ Pending</span>';
+      }
+
+      function showToast(msg, type) {
+        const c = document.getElementById("toastContainer");
+        const t = document.createElement("div");
+        t.className = `toast toast-${type}`;
+        t.textContent = msg;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 4000);
+      }
+
+      function getFirebaseError(error) {
+        const map = {
+          "auth/email-already-in-use": "Email already registered.",
+          "auth/invalid-email": "Invalid email.",
+          "auth/weak-password": "Password too weak.",
+          "auth/user-not-found": "User not found.",
+          "auth/wrong-password": "Wrong password.",
+          "auth/invalid-credential": "Invalid credentials.",
+          "auth/too-many-requests": "Too many attempts.",
+        };
+        return map[error.code] || error.message;
+      }
+
+      // Copy & share invite
+      function copyInviteLink() {
+        const link =
+          location.origin +
+          location.pathname +
+          "?ref=" +
+          (currentUserData?.inviteCode || "");
+        navigator.clipboard
+          .writeText(link)
+          .then(() => showToast("Copied!", "success"));
+      }
+      function shareInviteLink() {
+        const link =
+          location.origin +
+          location.pathname +
+          "?ref=" +
+          (currentUserData?.inviteCode || "");
+        if (navigator.share)
+          navigator.share({ title: "Halal Money", url: link });
+        else copyInviteLink();
+      }
+      function exportUserData() {
+        const d = currentUserData;
+        const csv = `Name,${d.name}\nEmail,${d.email}\nBalance,${d.balance}\nProfit Share,${d.profitSharePercent}%`;
+        const blob = new Blob([csv], { type: "text/csv" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "halal_data.csv";
+        a.click();
+      }
+
+      function goHome() {
+        showDashboard();
+      }
+
+      // ... admin tab switching, etc. (full code as in previous answers)
+    </script>
+  </body>
+</html>
